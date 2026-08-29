@@ -1,0 +1,18 @@
+# Environment variables & secrets
+.env
+.env.*
+!.env.example
+
+# Python Caches & Compiled Files
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Virtual Environments
+venv/
+app/venv/
+env/
+ENV/
