@@ -1,10 +1,20 @@
-export default function PlanSection({ title, children }) {
+export default function PlanSection({ id, title, subtitle, children }) {
   return (
-    <section className="rounded-2xl border border-zinc-800/80 bg-zinc-900/60 p-6 sm:p-8 shadow-xl backdrop-blur-sm">
-      <h3 className="text-xl font-bold text-white tracking-tight border-b border-zinc-800/80 pb-4 mb-6">
-        {title}
-      </h3>
+    <section
+      id={id}
+      className="scroll-mt-20 rounded-xl border border-slate-200 bg-white p-6 shadow-xs"
+    >
+      <div className="border-b border-slate-100 pb-3 mb-5">
+        <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
+          {title}
+        </h3>
+        {subtitle && (
+          <p className="text-xs text-slate-500 mt-0.5">
+            {subtitle}
+          </p>
+        )}
+      </div>
       <div>{children}</div>
     </section>
   );
-}
+}

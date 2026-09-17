@@ -4,8 +4,11 @@ from typing import TypedDict, List, Dict, Any
 class HackathonState(TypedDict, total=False):
 
     session_id: str
+    input_mode: str
 
     hackathon_url: str
+    problem_statement: str
+    constraints: Dict[str, Any]
 
     hackathon_content: str
     research_results: List[Dict[str, Any]]

@@ -1,4 +1,5 @@
-import { Send, Sparkles, Check, RefreshCw } from "lucide-react";
+import { useState } from "react";
+import { Send, ArrowRight, RefreshCw, CheckCircle2 } from "lucide-react";
 
 export default function FeedbackBox({
   selectedIdea,
@@ -6,82 +7,91 @@ export default function FeedbackBox({
   setFeedback,
   onRefine,
   onConfirm,
-  loading,
+  loading = false,
 }) {
   const suggestions = [
-    "Make it simpler",
-    "Focus more on AI",
-    "Make it more innovative",
-    "Reduce the number of features",
-    "Make it easier to build",
-    "Improve the demo potential",
+    "Make it simpler to build",
+    "Focus more on core AI logic",
+    "Reduce feature scope for MVP",
+    "Strengthen the live demo appeal",
+    "Lower technical risk",
   ];
 
   const handleChipClick = (suggestion) => {
     if (feedback.trim()) {
-      setFeedback(`${feedback.trim()} ${suggestion.toLowerCase()}.`);
+      setFeedback(`${feedback.trim()} Also ${suggestion.toLowerCase()}.`);
     } else {
       setFeedback(suggestion + ".");
     }
   };
 
   return (
-    <div className="rounded-2xl border border-indigo-500/40 bg-zinc-900/90 p-6 sm:p-8 shadow-2xl ring-1 ring-indigo-500/20">
+    <div className="rounded-xl border border-slate-300 bg-white p-6 shadow-sm">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/20 text-indigo-400">
-          <Sparkles size={20} />
-        </div>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
         <div>
-          <h3 className="text-xl font-bold text-white">
-            Is this idea right for you?
+          <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700 block mb-0.5">
+            Step 2: Selected Idea Review
+          </span>
+          <h3 className="text-lg font-bold text-slate-900">
+            {selectedIdea?.title || "Selected Project Concept"}
           </h3>
-          <p className="text-xs text-zinc-400 mt-0.5">
-            Refine it using human feedback or confirm it to generate your project plan.
-          </p>
         </div>
+
+        <button
+          type="button"
+          onClick={onConfirm}
+          disabled={loading}
+          className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-blue-700 transition disabled:opacity-50 shrink-0"
+        >
+          <span>Generate Complete Build Plan</span>
+          <ArrowRight size={14} />
+        </button>
       </div>
 
-      {/* Selected Idea Summary Banner */}
+      {/* Selected Idea Details Summary */}
       {selectedIdea && (
-        <div className="mt-5 rounded-xl border border-zinc-800 bg-zinc-950 p-4">
-          <div className="flex items-center justify-between gap-3">
-            <h4 className="font-semibold text-white text-base">
-              {selectedIdea.title}
-            </h4>
-            {selectedIdea.difficulty && (
-              <span className="rounded-full bg-zinc-800 border border-zinc-700 px-2.5 py-0.5 text-[11px] text-zinc-300">
-                {selectedIdea.difficulty}
-              </span>
-            )}
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 text-xs">
+          <div className="rounded-lg bg-slate-50 p-3.5 border border-slate-200">
+            <span className="font-semibold text-slate-700 block mb-1">Proposed Solution</span>
+            <p className="text-slate-600 leading-relaxed">
+              {selectedIdea.solution || selectedIdea.problem}
+            </p>
           </div>
-          <p className="mt-2 text-xs leading-relaxed text-zinc-400">
-            {selectedIdea.solution || selectedIdea.problem}
-          </p>
-          {selectedIdea.tech_stack?.length > 0 && (
-            <div className="mt-3 flex flex-wrap gap-1.5">
-              {selectedIdea.tech_stack.map((t, idx) => (
-                <span key={idx} className="rounded bg-zinc-900 border border-zinc-800 px-2 py-0.5 text-[10px] text-zinc-400">
+
+          <div className="rounded-lg bg-slate-50 p-3.5 border border-slate-200">
+            <span className="font-semibold text-slate-700 block mb-1">Architecture & Tech Stack</span>
+            <div className="flex flex-wrap gap-1 mt-1">
+              {selectedIdea.tech_stack?.map((t, idx) => (
+                <span
+                  key={idx}
+                  className="rounded border border-slate-200 bg-white px-2 py-0.5 text-[11px] text-slate-700"
+                >
                   {t}
                 </span>
               ))}
             </div>
-          )}
+            {selectedIdea.difficulty && (
+              <div className="mt-2 text-slate-500 text-[11px]">
+                Target: {selectedIdea.difficulty} difficulty · {selectedIdea.estimated_hours || 24} hours
+              </div>
+            )}
+          </div>
         </div>
       )}
 
       {/* Quick Suggestion Chips */}
       <div className="mt-5">
-        <label className="text-xs font-semibold uppercase tracking-wider text-zinc-400 block mb-2">
-          Quick suggestions
+        <label className="text-xs font-semibold text-slate-700 block mb-2">
+          Want to adjust anything before generating the plan?
         </label>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-1.5">
           {suggestions.map((suggestion, idx) => (
             <button
               key={idx}
               type="button"
               onClick={() => handleChipClick(suggestion)}
-              className="rounded-lg border border-zinc-800 bg-zinc-950/80 px-3 py-1.5 text-xs text-zinc-300 transition hover:border-indigo-500/50 hover:bg-indigo-500/10 hover:text-indigo-300"
+              className="rounded-md border border-slate-200 bg-slate-50 hover:bg-slate-100 hover:border-slate-300 px-2.5 py-1 text-xs text-slate-600 transition"
             >
               + {suggestion}
             </button>
@@ -90,48 +100,47 @@ export default function FeedbackBox({
       </div>
 
       {/* Feedback Textarea */}
-      <div className="mt-4">
-        <label className="text-xs font-semibold uppercase tracking-wider text-zinc-400 block mb-2">
-          Tell CarryJob what you'd like to change...
-        </label>
+      <div className="mt-3">
         <textarea
           value={feedback}
           onChange={(e) => setFeedback(e.target.value)}
-          placeholder="e.g. Make the project simpler and focus more on AI..."
-          rows={3}
-          className="w-full resize-none rounded-xl border border-zinc-800 bg-zinc-950 p-4 text-xs sm:text-sm text-white outline-none transition placeholder:text-zinc-600 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+          placeholder="Optional: Specify any changes you'd like to make to this project concept before building the roadmap..."
+          rows={2}
+          className="w-full rounded-lg border border-slate-200 bg-slate-50/50 p-3 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-blue-500 focus:outline-none resize-none"
         />
       </div>
 
-      {/* Actions Row */}
-      <div className="mt-5 flex flex-col sm:flex-row gap-3">
+      {/* Action Row */}
+      <div className="mt-3 flex items-center justify-between gap-3">
         <button
+          type="button"
           onClick={onRefine}
           disabled={loading || !feedback.trim()}
-          className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-indigo-500/50 bg-indigo-500/20 px-5 py-3 text-xs font-semibold text-indigo-300 transition hover:bg-indigo-500/30 hover:border-indigo-500 disabled:cursor-not-allowed disabled:opacity-40"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 transition disabled:opacity-40"
         >
           {loading ? (
             <>
-              <RefreshCw size={15} className="animate-spin" />
-              Refining Idea...
+              <RefreshCw size={13} className="animate-spin" />
+              <span>Refining...</span>
             </>
           ) : (
             <>
-              <Send size={15} />
-              Refine Idea
+              <Send size={13} />
+              <span>Refine with Feedback</span>
             </>
           )}
         </button>
 
         <button
+          type="button"
           onClick={onConfirm}
           disabled={loading}
-          className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-xs font-semibold text-white shadow-lg shadow-indigo-600/30 transition hover:bg-indigo-500 disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-blue-700 transition disabled:opacity-50"
         >
-          <Check size={16} />
-          Use This Idea
+          <span>Use This Idea & Create Plan</span>
+          <ArrowRight size={14} />
         </button>
       </div>
     </div>
   );
-}
+}

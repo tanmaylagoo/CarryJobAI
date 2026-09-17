@@ -11,6 +11,7 @@ from fastapi.middleware.cors import (
 
 from app.schemas import (
     HackathonURLRequest,
+    ProblemStatementRequest,
     TeamInput,
     SelectIdeaRequest,
     RefineIdeaRequest,
@@ -67,6 +68,7 @@ def analyze_hackathon(
 
     state = {
         "session_id": session_id,
+        "input_mode": "hackathon_url",
         "hackathon_url": str(
             data.url
         )
@@ -91,15 +93,48 @@ def analyze_hackathon(
             detail=f"Research/AI analysis failed: {str(e)}"
         )
 
+    result["input_mode"] = "hackathon_url"
     sessions[session_id] = result
 
     return {
         "session_id": session_id,
+        "input_mode": "hackathon_url",
         "hackathon": result[
             "hackathon"
         ],
         "team": result.get("team", [])
     }
+
+
+@app.post("/api/analyze-problem")
+def analyze_problem(
+    data: ProblemStatementRequest
+):
+    session_id = str(uuid.uuid4())
+
+    constraints_dict = data.constraints.model_dump()
+    team_members = data.team_members or data.constraints.team_members
+
+    state = {
+        "session_id": session_id,
+        "input_mode": "problem_statement",
+        "problem_statement": data.problem_statement,
+        "constraints": constraints_dict,
+        "team": [member.model_dump() for member in team_members] if team_members else [],
+        "hackathon": None
+    }
+
+    sessions[session_id] = state
+
+    return {
+        "session_id": session_id,
+        "input_mode": "problem_statement",
+        "problem_statement": data.problem_statement,
+        "constraints": constraints_dict,
+        "team": state["team"],
+        "hackathon": None
+    }
+
 
 
 

@@ -1,39 +1,36 @@
 import { useState } from "react";
-import { Users, Plus, X, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, X, Users, Check } from "lucide-react";
 
 const SUGGESTED_SKILLS = [
   "Python",
   "React",
   "FastAPI",
-  "Generative AI",
-  "Machine Learning",
-  "TypeScript",
   "Node.js",
-  "UI/UX Design",
-  "PyTorch",
-  "Tailwind CSS",
+  "TypeScript",
+  "Machine Learning",
   "PostgreSQL",
+  "PyTorch",
   "Docker",
+  "Tailwind CSS",
+  "Next.js",
+  "Go",
 ];
 
 export default function TeamSetup({
   initialTeam,
   onSaveTeam,
-  loading,
-  defaultOpen = false,
-  hideHeaderToggle = false,
+  loading = false,
   showSaveButton = true,
   saveButtonText = "Save Team & Regenerate Ideas",
   onTeamChange,
 }) {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
   const [members, setMembers] = useState(
     initialTeam && initialTeam.length > 0
       ? initialTeam
       : [
           {
-            name: "Developer 1",
-            skills: ["Python", "FastAPI", "React", "Machine Learning"],
+            name: "Team Member 1",
+            skills: ["Python", "FastAPI", "Machine Learning"],
           },
         ]
   );
@@ -74,10 +71,11 @@ export default function TeamSetup({
   };
 
   const handleAddMember = () => {
+    const nextIndex = members.length + 1;
     const updated = [
       ...members,
       {
-        name: `Developer ${members.length + 1}`,
+        name: `Team Member ${nextIndex}`,
         skills: ["React", "Python"],
       },
     ];
@@ -99,213 +97,137 @@ export default function TeamSetup({
   };
 
   return (
-    <div className="rounded-2xl border border-zinc-800 bg-zinc-900/70 p-5 sm:p-6 shadow-xl mb-8">
-      {/* Header Bar */}
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-500/15 text-indigo-400">
-            <Users size={18} />
-          </div>
-          <div>
-            <h3 className="font-bold text-white text-base sm:text-lg flex items-center gap-2">
-              Team & Skills Configuration
-              <span className="rounded-full bg-zinc-800 border border-zinc-700 px-2.5 py-0.5 text-xs text-indigo-400 font-medium">
-                {members.length} Member{members.length > 1 ? "s" : ""}
-              </span>
-            </h3>
-            <p className="text-xs text-zinc-400 mt-0.5">
-              Specify your teammates and technical skillsets to customize AI project ideation.
-            </p>
-          </div>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <label className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
+            Team Members ({members.length})
+          </label>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Add team members and technical skills to align idea feasibility with team capacity.
+          </p>
         </div>
+      </div>
 
-        {!hideHeaderToggle && (
+      {/* Member Cards List */}
+      <div className="space-y-3">
+        {members.map((member, memberIdx) => (
+          <div
+            key={memberIdx}
+            className="rounded-lg border border-slate-200 bg-white p-4 shadow-xs transition-colors hover:border-slate-300"
+          >
+            {/* Top row: Name + Remove button */}
+            <div className="flex items-center justify-between gap-3 pb-3 border-b border-slate-100">
+              <input
+                type="text"
+                value={member.name}
+                onChange={(e) => handleNameChange(memberIdx, e.target.value)}
+                placeholder="Member name or role (e.g. Alice)"
+                className="font-semibold text-sm text-slate-900 bg-transparent border-0 p-0 focus:outline-none focus:ring-0 placeholder:text-slate-400 w-full"
+              />
+
+              {members.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => handleRemoveMember(memberIdx)}
+                  className="text-xs font-medium text-slate-400 hover:text-red-600 transition shrink-0"
+                >
+                  Remove
+                </button>
+              )}
+            </div>
+
+            {/* Skills display & management */}
+            <div className="pt-3">
+              {/* Active skill chips */}
+              <div className="flex flex-wrap items-center gap-1.5 mb-2.5">
+                {member.skills.map((skill, sIdx) => (
+                  <span
+                    key={sIdx}
+                    className="inline-flex items-center gap-1 rounded-md bg-slate-100 border border-slate-200 px-2 py-0.5 text-xs text-slate-700"
+                  >
+                    <span>{skill}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveSkill(memberIdx, skill)}
+                      className="text-slate-400 hover:text-slate-700"
+                      title="Remove skill"
+                    >
+                      <X size={12} />
+                    </button>
+                  </span>
+                ))}
+              </div>
+
+              {/* Add custom skill input */}
+              <div className="flex items-center gap-2 max-w-sm">
+                <input
+                  type="text"
+                  value={skillInputs[memberIdx] || ""}
+                  onChange={(e) =>
+                    setSkillInputs({ ...skillInputs, [memberIdx]: e.target.value })
+                  }
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleAddSkill(memberIdx, skillInputs[memberIdx] || "");
+                    }
+                  }}
+                  placeholder="Type skill and press enter..."
+                  className="flex-1 rounded-md border border-slate-200 bg-slate-50/50 px-2.5 py-1 text-xs text-slate-800 placeholder:text-slate-400 focus:bg-white focus:border-blue-500 focus:outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => handleAddSkill(memberIdx, skillInputs[memberIdx] || "")}
+                  className="rounded-md bg-slate-100 hover:bg-slate-200 px-2.5 py-1 text-xs font-medium text-slate-700 transition"
+                >
+                  Add
+                </button>
+              </div>
+
+              {/* Quick suggestion chips */}
+              <div className="mt-2.5 flex flex-wrap items-center gap-1">
+                <span className="text-[11px] text-slate-400 mr-1">Suggestions:</span>
+                {SUGGESTED_SKILLS.filter((s) => !member.skills.includes(s))
+                  .slice(0, 5)
+                  .map((suggested, sIdx) => (
+                    <button
+                      key={sIdx}
+                      type="button"
+                      onClick={() => handleAddSkill(memberIdx, suggested)}
+                      className="rounded border border-slate-200 bg-white px-1.5 py-0.5 text-[11px] text-slate-600 hover:border-blue-400 hover:text-blue-700 transition"
+                    >
+                      + {suggested}
+                    </button>
+                  ))}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Add Member Button */}
+      <div className="flex items-center justify-between pt-1">
+        <button
+          type="button"
+          onClick={handleAddMember}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition shadow-xs"
+        >
+          <Plus size={14} className="text-slate-500" />
+          <span>Add team member</span>
+        </button>
+
+        {showSaveButton && (
           <button
             type="button"
-            onClick={() => setIsOpen(!isOpen)}
-            className="flex items-center gap-1.5 rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs font-semibold text-zinc-300 transition hover:border-zinc-700 hover:text-white"
+            onClick={handleSave}
+            disabled={loading}
+            className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-blue-700 transition disabled:opacity-50"
           >
-            {isOpen ? (
-              <>
-                Hide Team Editor
-                <ChevronUp size={15} />
-              </>
-            ) : (
-              <>
-                Customize Team Skills
-                <ChevronDown size={15} />
-              </>
-            )}
+            {loading ? "Updating Ideas..." : saveButtonText}
           </button>
         )}
       </div>
-
-      {/* Summary View when collapsed */}
-      {!isOpen && (
-        <div className="mt-4 pt-4 border-t border-zinc-800/60 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-3">
-            {members.map((m, idx) => (
-              <div key={idx} className="flex items-center gap-2 rounded-xl bg-zinc-950 border border-zinc-800 px-3 py-1.5 text-xs">
-                <span className="font-semibold text-zinc-200">{m.name}:</span>
-                <div className="flex flex-wrap gap-1">
-                  {m.skills.slice(0, 3).map((s, sIdx) => (
-                    <span key={sIdx} className="rounded bg-indigo-500/10 text-indigo-300 px-1.5 py-0.5 text-[10px]">
-                      {s}
-                    </span>
-                  ))}
-                  {m.skills.length > 3 && (
-                    <span className="text-[10px] text-zinc-500">+{m.skills.length - 3} more</span>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-          <button
-            type="button"
-            onClick={() => setIsOpen(true)}
-            className="text-xs text-indigo-400 hover:underline font-medium"
-          >
-            Edit Teammates →
-          </button>
-        </div>
-      )}
-
-      {/* Expanded Editor Form */}
-      {isOpen && (
-        <div className="mt-6 space-y-6 pt-6 border-t border-zinc-800/80">
-          <div className="space-y-4">
-            {members.map((member, memberIdx) => (
-              <div
-                key={memberIdx}
-                className="rounded-xl border border-zinc-800 bg-zinc-950 p-4 sm:p-5 relative"
-              >
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-                  <div className="flex-1 max-w-sm">
-                    <label className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 block mb-1">
-                      Teammate Name / Role
-                    </label>
-                    <input
-                      type="text"
-                      value={member.name}
-                      onChange={(e) => handleNameChange(memberIdx, e.target.value)}
-                      placeholder="e.g. Developer, Alex, Frontend Lead"
-                      className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-xs text-white outline-none focus:border-indigo-500"
-                    />
-                  </div>
-
-                  {members.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveMember(memberIdx)}
-                      className="text-xs text-rose-400 hover:text-rose-300 flex items-center gap-1 self-end sm:self-center"
-                    >
-                      <X size={14} /> Remove Teammate
-                    </button>
-                  )}
-                </div>
-
-                {/* Skills Input & Tags */}
-                <div>
-                  <label className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 block mb-1">
-                    Skills & Technologies
-                  </label>
-
-                  {/* Existing Skill Badges */}
-                  <div className="flex flex-wrap gap-1.5 mb-3">
-                    {member.skills.map((skill, sIdx) => (
-                      <span
-                        key={sIdx}
-                        className="inline-flex items-center gap-1.5 rounded-md bg-indigo-500/15 border border-indigo-500/30 px-2.5 py-1 text-xs font-medium text-indigo-300"
-                      >
-                        {skill}
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveSkill(memberIdx, skill)}
-                          className="hover:text-white"
-                        >
-                          <X size={12} />
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-
-                  {/* Add Custom Skill Input */}
-                  <div className="flex items-center gap-2 max-w-md">
-                    <input
-                      type="text"
-                      value={skillInputs[memberIdx] || ""}
-                      onChange={(e) =>
-                        setSkillInputs({ ...skillInputs, [memberIdx]: e.target.value })
-                      }
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          handleAddSkill(memberIdx, skillInputs[memberIdx] || "");
-                        }
-                      }}
-                      placeholder="Type a skill and press Enter (e.g. PyTorch)..."
-                      className="flex-1 rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-xs text-white outline-none focus:border-indigo-500 placeholder:text-zinc-600"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => handleAddSkill(memberIdx, skillInputs[memberIdx] || "")}
-                      className="rounded-lg bg-zinc-800 px-3 py-1.5 text-xs font-medium text-zinc-200 hover:bg-zinc-700"
-                    >
-                      Add
-                    </button>
-                  </div>
-
-                  {/* Suggested Skills */}
-                  <div className="mt-3">
-                    <span className="text-[10px] text-zinc-500 block mb-1">Quick add popular skills:</span>
-                    <div className="flex flex-wrap gap-1">
-                      {SUGGESTED_SKILLS.filter((s) => !member.skills.includes(s)).map((s, idx) => (
-                        <button
-                          key={idx}
-                          type="button"
-                          onClick={() => handleAddSkill(memberIdx, s)}
-                          className="rounded bg-zinc-900 border border-zinc-800 px-2 py-0.5 text-[10px] text-zinc-400 hover:border-indigo-500/50 hover:text-indigo-300"
-                        >
-                          + {s}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Action Row */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
-            <button
-              type="button"
-              onClick={handleAddMember}
-              className="flex items-center gap-1.5 rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-2 text-xs font-semibold text-zinc-300 transition hover:border-zinc-700 hover:text-white"
-            >
-              <Plus size={15} /> Add Another Teammate
-            </button>
-
-            {showSaveButton && (
-              <button
-                type="button"
-                onClick={handleSave}
-                disabled={loading}
-                className="flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-6 py-2.5 text-xs font-bold text-white shadow-lg shadow-indigo-600/30 transition hover:bg-indigo-500 disabled:opacity-50"
-              >
-                {loading ? (
-                  "Processing..."
-                ) : (
-                  <>
-                    <Sparkles size={14} />
-                    {saveButtonText}
-                  </>
-                )}
-              </button>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

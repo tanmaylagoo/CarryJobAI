@@ -21,6 +21,18 @@ export const analyzeHackathon = async (url, teamMembers = []) => {
   return response.data;
 };
 
+export const analyzeProblem = async (problemStatement, constraints, teamMembers = []) => {
+  const response = await api.post("/api/analyze-problem", {
+    input_mode: "problem_statement",
+    problem_statement: problemStatement,
+    constraints: constraints,
+    team_members: teamMembers,
+  });
+
+  return response.data;
+};
+
+
 export const addTeam = async (
   sessionId,
   teamMembers

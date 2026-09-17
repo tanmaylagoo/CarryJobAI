@@ -5,6 +5,7 @@ import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Ideas from "./pages/Ideas";
 import Workspace from "./pages/Workspace";
+import Loading from "./components/Loading";
 
 import { createPlan } from "./services/api";
 
@@ -14,7 +15,7 @@ export default function App() {
   const [planning, setPlanning] = useState(false);
   const [error, setError] = useState("");
 
-  // After hackathon analysis
+  // After hackathon analysis or problem submission
   const handleAnalyzed = (data) => {
     setSession(data);
     setError("");
@@ -39,7 +40,6 @@ export default function App() {
       // Merge the selected idea + generated plan
       const updatedSession = {
         ...data,
-
         evaluation: result.evaluation,
         project_plan: result.project_plan,
         team_plan: result.team_plan,
@@ -56,9 +56,7 @@ export default function App() {
       console.error("Planning failed:", err);
 
       setError(
-        err.response?.data?.detail ||
-          err.message ||
-          "Unable to create the project plan."
+        "Something went wrong while creating your project build plan. Please try again."
       );
 
       // Stay on the ideas page if planning fails
@@ -75,14 +73,20 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white">
+    <div className="min-h-screen bg-slate-50/50 text-slate-900 font-sans antialiased">
       <Navbar page={page} setPage={setPage} session={session} />
 
       {/* Global planning error */}
       {error && (
-        <div className="mx-auto mt-4 max-w-6xl px-6">
-          <div className="rounded-xl border border-red-900/50 bg-red-950/20 p-4 text-sm text-red-400">
-            {error}
+        <div className="mx-auto mt-4 max-w-6xl px-4 sm:px-6">
+          <div className="flex items-center justify-between rounded-lg border border-red-200 bg-red-50 p-4 text-xs sm:text-sm text-red-800">
+            <span>{error}</span>
+            <button
+              onClick={() => setError("")}
+              className="text-xs font-semibold text-red-600 hover:text-red-800 ml-4"
+            >
+              Dismiss
+            </button>
           </div>
         </div>
       )}
@@ -116,18 +120,9 @@ export default function App() {
 
       {/* Planning overlay */}
       {planning && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-          <div className="rounded-2xl border border-zinc-800 bg-zinc-900 px-8 py-7 text-center shadow-2xl">
-            <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-zinc-700 border-t-indigo-400" />
-
-            <h2 className="text-lg font-semibold text-white">
-              Building your game plan
-            </h2>
-
-            <p className="mt-2 text-sm text-zinc-500">
-              Evaluating the idea, planning the architecture,
-              timeline and presentation...
-            </p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/30 backdrop-blur-xs p-4">
+          <div className="w-full max-w-md">
+            <Loading text="Building architecture, timeline, workloads, and pitch slides..." />
           </div>
         </div>
       )}
